@@ -20,7 +20,7 @@ namespace PsiogPaisaAPI.Controllers
         public async Task<IActionResult> TransactionExternal([FromBody] External external)
         {
 
-            if (external == null || external.Amount <= 0)
+            if (external == null || external.Amount <= 0 )
             {
                 return BadRequest();
             }
@@ -38,12 +38,18 @@ namespace PsiogPaisaAPI.Controllers
 
 
             var wal = _dbcontext.SelfWallet.FirstOrDefault(e => e.EmpId == external.EmpId);
-            wal.WalletAmount = wal.WalletAmount - external.Amount;
 
             if (wal == null)
             {
                 return NotFound();
             }
+            wal.WalletAmount = wal.WalletAmount - external.Amount;
+
+            if (wal.WalletAmount <= 0)
+            {
+                return NotFound();
+            }
+
             _dbcontext.SelfWallet.Update(wal);
             _dbcontext.SaveChanges();
 

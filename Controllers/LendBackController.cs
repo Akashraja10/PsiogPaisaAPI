@@ -47,6 +47,7 @@ namespace PsiogPaisaAPI.Controllers
             double? tfamount = wal1[1].wa + lendBack.PaybackAmount;
 
             var swl1 = _dbcontext.SelfWallet.Find(wal1[1].gid);
+
             _dbcontext.Entry(swl1).State = EntityState.Unchanged;
             swl1.WalletAmount = tfamount;
 
@@ -65,6 +66,10 @@ namespace PsiogPaisaAPI.Controllers
             double? famount= wal2[1].wam - lendBack.PaybackAmount;
 
             var swl2 = _dbcontext.SelfWallet.Find(wal2[1].rid);
+            if (famount <= 0)
+            {
+                return NotFound();
+            }
             _dbcontext.Entry(swl2).State= EntityState.Unchanged;
             swl2.WalletAmount = famount;
 
@@ -89,11 +94,13 @@ namespace PsiogPaisaAPI.Controllers
         {
             var request = (from req in _dbcontext.Requests
                            join gp in _dbcontext.Groups on req.ReqId equals gp.ReqId
+                           join emp in _dbcontext.Employees on gp.ContributorId equals emp.EmpId
                            where req.EmpId == id & gp.StatusId!=4
                            select new
                            {
                                gp.GroupId,
                                gp.ContributorId,
+                               emp.EmpFname,
                                gp.Amount
 
                            }).ToList();

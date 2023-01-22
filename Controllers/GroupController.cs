@@ -43,10 +43,12 @@ namespace PsiogPaisaAPI.Controllers
           public IActionResult ShowRequest(int Id)
           {
             var wal4 = (from req in _dbcontext.Requests
+                        join ep in _dbcontext.Employees on req.EmpId equals ep.EmpId 
                         where Id != req.EmpId && req.QuotedAmount!=req.RecievedAmount && req.QuotedAmount >=req.RecievedAmount
                         select new
                         {
                             requestID=req.ReqId,
+                            name= ep.EmpFname,
                             reason=req.Purpose,
                             quotedAmount = req.QuotedAmount,
                             recievedAmount=req.RecievedAmount
@@ -91,13 +93,17 @@ namespace PsiogPaisaAPI.Controllers
 
             //update contributor wallet
             var wal1 = _dbcontext.SelfWallet.FirstOrDefault(e => e.EmpId == group.ContributorId);
-            wal1.WalletAmount = wal1.WalletAmount - group.Amount;
-
-            if (wal1 == null)
+           
+            if (wal1 == null )
             {
                 return NotFound();
             }
+            wal1.WalletAmount = wal1.WalletAmount - group.Amount;
 
+            if (wal1.WalletAmount <= 0)
+            {
+                return NotFound();
+            }
 
 
             //update receiver wallet          

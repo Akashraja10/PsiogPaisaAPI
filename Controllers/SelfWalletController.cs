@@ -70,6 +70,8 @@ namespace PsiogPaisaAPI.Controllers
         public async Task<IActionResult>UpdateAcc(int empID, SelfWallet selfWallet)
         {
             var self = await _dbcontext.SelfWallet.FindAsync(empID);
+            var mas= await _dbcontext.MasterAccounts.FirstOrDefaultAsync(e=>e.EmployeeEmpId== empID);
+
             if(self == null)
             {
                 return BadRequest();
@@ -77,8 +79,20 @@ namespace PsiogPaisaAPI.Controllers
           
             //self.EmpId = selfWallet.EmpId;
             self.WalletAmount = self.WalletAmount+ selfWallet.WalletAmount;
+            mas.TotalAmount= (double)(mas.TotalAmount-selfWallet.WalletAmount);
+
+            if (mas.TotalAmount <= 0)
+            {
+                return BadRequest();
+            }
+/*
+            if (wal.WalletAmount <= 0)
+            {
+                return NotFound();
+            }*/
 
             _dbcontext.SelfWallet.Update(self);
+            _dbcontext.MasterAccounts.Update(mas);
 
             _dbcontext.SaveChanges();
             return Ok(self);

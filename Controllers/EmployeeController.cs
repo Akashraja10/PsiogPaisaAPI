@@ -1,5 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
@@ -47,6 +49,58 @@ namespace PsiogPaisaAPI.Controllers
             });
         }
 
+        [HttpPost("admin")]
+        public async Task<IActionResult> AdminLogin([FromBody] Employee employee)
+        {
+            if (employee == null)
+            {
+                return BadRequest();
+            }
+            var emp = await _dbcontext.Employees
+                .FirstOrDefaultAsync(x => x.Username == "admin" && x.Password == "admin");
+
+
+            if (emp == null)
+            {
+                return NotFound(new { Message = "Employee Not Found !" });
+
+            }
+
+
+            return Ok(emp);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllEmployees()
+        {
+            var hello = (from ind in _dbcontext.Employees
+
+                         select new
+                         {
+                             ind.EmpId,
+                             ind.Username,
+                             ind.EmpFname,
+
+                             ind.Age,
+
+                         }).ToList();
+
+            return Ok(hello);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteEmployee(int id)
+        {
+            var employee = await _dbcontext.Employees.FindAsync(id);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            _dbcontext.Employees.Remove(employee);
+            await _dbcontext.SaveChangesAsync();
+            return Ok(employee);
+        }
 
 
 
@@ -70,8 +124,12 @@ namespace PsiogPaisaAPI.Controllers
                     Age = employee.Age,
                     Gender = employee.Gender,
                 };
-                await _dbcontext.Employees.AddAsync(user);
+                await _dbcontext.Employees.AddAsync(employee);
                 await _dbcontext.SaveChangesAsync();
+
+
+               // EmailGeneration.sendemail(employee.Email, employee.EmpFname, employee.Username);
+
                 return Ok(user);
             }
             catch (Exception ex)
@@ -100,8 +158,39 @@ namespace PsiogPaisaAPI.Controllers
             return jwt.WriteToken(token);
 
         }
+        public class EmailGeneration
+        {
+            public static void sendemail(string Email, string EmpFname, string Username)
+            {
+                var fromEmail = new MailAddress("customercrud123@gmail.com");
+                var toEmail = new MailAddress(Email);
+                var fromEmailPassword = "psiog123!!!";
 
-        [HttpPost("forgotPassword")]
+                string subject = "STREAM ALLOTMENT";
+                string body = "<br/><br/> " + "Hi " + EmpFname + ": " + "<br/>" +
+                    "The employee username " + Username + " is been added to the PsiogPaisa." + "<br/>" +                   
+                     "Warm Regards";
+                var smtp = new SmtpClient
+                {
+                    Host = "smtp.gmail.com",
+                    Port = 587,
+                    EnableSsl = true,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential("customercrud123@gmail.com", fromEmailPassword)
+
+                };
+                using (var message = new MailMessage(fromEmail, toEmail)
+                {
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true
+                })
+                    smtp.Send(message);
+            }
+        }
+
+            [HttpPost("forgotPassword")]
         public async Task<IActionResult> Forgotpassword([FromBody] ForgotPassword forgotPassword)
         {
             try

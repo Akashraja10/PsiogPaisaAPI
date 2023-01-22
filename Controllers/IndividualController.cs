@@ -21,7 +21,7 @@ namespace PsiogPaisaAPI.Controllers
         public async Task<IActionResult> TransactionIndividual([FromBody] Individual individual)
         {
            
-                if (individual == null || individual.Amount <= 0 || individual.Amount >=1000)
+                if (individual == null || individual.Amount <= 0 )
                 {
                     return BadRequest();
                 }
@@ -41,13 +41,19 @@ namespace PsiogPaisaAPI.Controllers
 
 
                 var wal = _dbcontext.SelfWallet.FirstOrDefault(e => e.EmpId == individual.SenderId);
-                wal.WalletAmount= wal.WalletAmount-individual.Amount;
 
                 if (wal == null)
                 {
                     return NotFound();
                 }
-                _dbcontext.SelfWallet.Update(wal);
+
+              wal.WalletAmount = wal.WalletAmount - individual.Amount;
+
+            if (wal.WalletAmount <= 0)
+            {
+                return NotFound();
+            }
+            _dbcontext.SelfWallet.Update(wal);
                 
 
                 
