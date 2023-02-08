@@ -17,13 +17,16 @@ namespace PsiogPaisaAPI.Controllers
         [HttpGet("{id}")]
         public IActionResult GetGroupTransaction(int id)
         {
-            var hello = (from ind in _dbcontext.Groups
-                         where id == ind.ContributorId
+            var hello = (from grp in _dbcontext.Groups
+                         join req in _dbcontext.Requests on grp.ReqId equals req.ReqId
+                         join emp in _dbcontext.Employees on req.EmpId equals emp.EmpId
+                         where id == grp.ContributorId
                          select new
                          {
-                             ind.GroupId,
-                             ind.ReqId,                         
-                             ind.Amount,
+                             emp.EmpFname,
+                             grp.GroupId,
+                             grp.ReqId,
+                             grp.Amount,
 
                          }).ToList();
 

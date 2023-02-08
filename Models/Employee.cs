@@ -23,6 +23,8 @@ public partial class Employee
 
     public string Gender { get; set; }
 
+    public int? Pin { get; set; }
+
     public virtual ICollection<External> Externals { get; } = new List<External>();
 
     public virtual ICollection<Group> Groups { get; } = new List<Group>();

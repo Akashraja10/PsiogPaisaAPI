@@ -71,7 +71,7 @@ namespace PsiogPaisaAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllEmployees()
+        public IActionResult GetAllEmployees()
         {
             var hello = (from ind in _dbcontext.Employees
 
@@ -80,7 +80,6 @@ namespace PsiogPaisaAPI.Controllers
                              ind.EmpId,
                              ind.Username,
                              ind.EmpFname,
-
                              ind.Age,
 
                          }).ToList();
@@ -123,12 +122,13 @@ namespace PsiogPaisaAPI.Controllers
                     Email = employee.Email,
                     Age = employee.Age,
                     Gender = employee.Gender,
+                   
                 };
                 await _dbcontext.Employees.AddAsync(employee);
                 await _dbcontext.SaveChangesAsync();
 
-
-               // EmailGeneration.sendemail(employee.Email, employee.EmpFname, employee.Username);
+                
+               EmailGeneration.Sendemail(user.Email, user.EmpFname, user.Username);
 
                 return Ok(user);
             }
@@ -137,21 +137,51 @@ namespace PsiogPaisaAPI.Controllers
                 return BadRequest(ex);
             }
         }
+
+        [HttpPost("{id}")]
+        public async Task<IActionResult> GetPin(int id,[FromBody]Employee employee)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var ex = await _dbcontext.Employees.FindAsync(id);
+                ex.Pin = employee.Pin;
+
+
+                //_dbcontext.Entry(employee).State = EntityState.Modified;
+                //await _dbcontext.Employees.AddAsync(employee);
+                await _dbcontext.SaveChangesAsync();
+
+                return Ok(ex);
+            }
+            catch (Exception exp)
+            {
+                return BadRequest(exp);
+            }
+
+        }
+
+
         private string CreateJwt(Employee emp)
         {
             var jwt = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes("superSecretKey@345");
-            var identity = new ClaimsIdentity(new Claim[]
+            var identity = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.SerialNumber,$"{emp.EmpId}"),
-                new Claim(ClaimTypes.Name, $"{emp.EmpFname}{emp.EmpLname}")
+                new Claim(ClaimTypes.Name, $"{emp.EmpFname}"),
+                new Claim(JwtRegisteredClaimNames.Jti,$"{emp.Pin}")
              });
             var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 
             var tokenDescripter = new SecurityTokenDescriptor
             {
                 Subject = identity,
-                Expires = DateTime.Now.AddDays(1),
+                Expires = DateTime.Now.AddMinutes(100),
                 SigningCredentials = credentials,
             };
             var token = jwt.CreateToken(tokenDescripter);
@@ -160,16 +190,17 @@ namespace PsiogPaisaAPI.Controllers
         }
         public class EmailGeneration
         {
-            public static void sendemail(string Email, string EmpFname, string Username)
+            public static void Sendemail(string Email, string EmpFname, string Username)
             {
                 var fromEmail = new MailAddress("customercrud123@gmail.com");
                 var toEmail = new MailAddress(Email);
-                var fromEmailPassword = "psiog123!!!";
+                var fromEmailPassword = "zkjvuorvpkkhmaem";
 
-                string subject = "STREAM ALLOTMENT";
+                string subject = "PSIOGPAISA SIGNUP";
                 string body = "<br/><br/> " + "Hi " + EmpFname + ": " + "<br/>" +
-                    "The employee username " + Username + " is been added to the PsiogPaisa." + "<br/>" +                   
-                     "Warm Regards";
+                    "Your Username:" + Username + " for the employee registration has been added to the PsiogPaisa." + "<br/>" +                   
+                     "Warm Regards" +"<br/>"+
+                     "<img src=https://media.licdn.com/dms/image/C511BAQGHEv_vDRHNHg/company-background_10000/0/1552019596670?e=1676271600&v=beta&t=g7tpr4UHCaEMBjqEEgCyWepMbv7XBow7PsnCpeP4kEc />";
                 var smtp = new SmtpClient
                 {
                     Host = "smtp.gmail.com",
@@ -185,8 +216,8 @@ namespace PsiogPaisaAPI.Controllers
                     Subject = subject,
                     Body = body,
                     IsBodyHtml = true
-                })
-                    smtp.Send(message);
+                }) 
+                smtp.Send(message);
             }
         }
 
@@ -209,6 +240,12 @@ namespace PsiogPaisaAPI.Controllers
 
                 var login = _dbcontext.Employees.FirstOrDefault(e => e.Username == forgotPassword.Username && e.Email == forgotPassword.Email);
                 login.Password = forgotPassword.ConfirmPassword;
+
+                if (login == null)
+                {
+                    return NotFound(new { Message = "Employee Not Found !" });
+
+                }
 
                 await _dbcontext.SaveChangesAsync();
                 _dbcontext.Employees.Update(login);

@@ -18,7 +18,7 @@ namespace PsiogPaisaAPI.Controllers
         [HttpGet("{empid}")]
         public IActionResult GetWalletAndMasterAcc(int empid)
         {
-            var wal4 = (from wal in _dbcontext.SelfWallet
+            var wal4 = (from wal in _dbcontext.SelfWallets
                         join ma in _dbcontext.MasterAccounts on wal.EmpId equals ma.EmployeeEmpId
                         where empid== wal.EmpId 
                         select new
@@ -40,7 +40,7 @@ namespace PsiogPaisaAPI.Controllers
         [HttpGet("WalId")]
         public async Task<IActionResult> GetWallet(int WalId)
         {
-            var wal = await _dbcontext.SelfWallet.FirstOrDefaultAsync(x => x.WalId == WalId);
+            var wal = await _dbcontext.SelfWallets.FirstOrDefaultAsync(x => x.WalId == WalId);
 
             if (wal == null)
             {
@@ -69,7 +69,7 @@ namespace PsiogPaisaAPI.Controllers
         [HttpPut("{empID}")]
         public async Task<IActionResult>UpdateAcc(int empID, SelfWallet selfWallet)
         {
-            var self = await _dbcontext.SelfWallet.FindAsync(empID);
+            var self = await _dbcontext.SelfWallets.FindAsync(empID);
             var mas= await _dbcontext.MasterAccounts.FirstOrDefaultAsync(e=>e.EmployeeEmpId== empID);
 
             if(self == null)
@@ -91,7 +91,7 @@ namespace PsiogPaisaAPI.Controllers
                 return NotFound();
             }*/
 
-            _dbcontext.SelfWallet.Update(self);
+            _dbcontext.SelfWallets.Update(self);
             _dbcontext.MasterAccounts.Update(mas);
 
             _dbcontext.SaveChanges();

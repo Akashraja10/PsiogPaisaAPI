@@ -21,10 +21,11 @@ namespace PsiogPaisaAPI.Controllers
         public IActionResult GetIndividualTransaction(int hi)
         {
             var hello = (from ind in _dbcontext.Individuals
+                         join emp in _dbcontext.Employees on ind.RecieverId equals emp.EmpId
                          where hi == ind.SenderId
                          select new
                          {
-                             
+                             emp.EmpFname,
                              ind.RecieverId,
                              ind.Amount,
                              ind.Time,

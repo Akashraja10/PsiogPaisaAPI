@@ -5,8 +5,6 @@ namespace PsiogPaisaAPI.Models;
 
 public partial class Group
 {
-   
-
     public int GroupId { get; set; }
 
     public int ReqId { get; set; }
@@ -30,5 +28,4 @@ public partial class Group
     public virtual Status Status { get; set; }
 
     public virtual PayType Type { get; set; }
-  
 }

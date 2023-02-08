@@ -37,7 +37,7 @@ namespace PsiogPaisaAPI.Controllers
             await _dbcontext.SaveChangesAsync();
 
 
-            var wal = _dbcontext.SelfWallet.FirstOrDefault(e => e.EmpId == external.EmpId);
+            var wal = _dbcontext.SelfWallets.FirstOrDefault(e => e.EmpId == external.EmpId);
 
             if (wal == null)
             {
@@ -50,7 +50,7 @@ namespace PsiogPaisaAPI.Controllers
                 return NotFound();
             }
 
-            _dbcontext.SelfWallet.Update(wal);
+            _dbcontext.SelfWallets.Update(wal);
             _dbcontext.SaveChanges();
 
             return Ok(ext);
@@ -62,7 +62,7 @@ namespace PsiogPaisaAPI.Controllers
 
         public async Task<IActionResult> GetWallet(int WalId)
         {
-            var wallet = await _dbcontext.SelfWallet.FirstOrDefaultAsync(x => x.WalId == WalId);
+            var wallet = await _dbcontext.SelfWallets.FirstOrDefaultAsync(x => x.WalId == WalId);
 
             if (wallet == null)
             {

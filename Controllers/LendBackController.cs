@@ -37,7 +37,7 @@ namespace PsiogPaisaAPI.Controllers
             //update contributor wallet
             var wal1 = (from lb in _dbcontext.LendBacks
                         join gp in _dbcontext.Groups on lb.GroupId equals gp.GroupId
-                        join sw in _dbcontext.SelfWallet on gp.ContributorId equals sw.EmpId
+                        join sw in _dbcontext.SelfWallets on gp.ContributorId equals sw.EmpId
                         select new
                         {
                             gid = gp.ContributorId,
@@ -46,7 +46,7 @@ namespace PsiogPaisaAPI.Controllers
 
             double? tfamount = wal1[1].wa + lendBack.PaybackAmount;
 
-            var swl1 = _dbcontext.SelfWallet.Find(wal1[1].gid);
+            var swl1 = _dbcontext.SelfWallets.Find(wal1[1].gid);
 
             _dbcontext.Entry(swl1).State = EntityState.Unchanged;
             swl1.WalletAmount = tfamount;
@@ -56,7 +56,7 @@ namespace PsiogPaisaAPI.Controllers
             var wal2 = (from lb in _dbcontext.LendBacks
                         join gp in _dbcontext.Groups on lb.GroupId equals gp.GroupId
                         join req in _dbcontext.Requests on gp.ReqId equals req.ReqId
-                        join sw in _dbcontext.SelfWallet on req.EmpId equals sw.EmpId
+                        join sw in _dbcontext.SelfWallets on req.EmpId equals sw.EmpId
                         select new
                         {
                             rid = req.EmpId,
@@ -65,7 +65,7 @@ namespace PsiogPaisaAPI.Controllers
 
             double? famount= wal2[1].wam - lendBack.PaybackAmount;
 
-            var swl2 = _dbcontext.SelfWallet.Find(wal2[1].rid);
+            var swl2 = _dbcontext.SelfWallets.Find(wal2[1].rid);
             if (famount <= 0)
             {
                 return NotFound();

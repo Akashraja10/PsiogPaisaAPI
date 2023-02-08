@@ -92,7 +92,7 @@ namespace PsiogPaisaAPI.Controllers
 
 
             //update contributor wallet
-            var wal1 = _dbcontext.SelfWallet.FirstOrDefault(e => e.EmpId == group.ContributorId);
+            var wal1 = _dbcontext.SelfWallets.FirstOrDefault(e => e.EmpId == group.ContributorId);
            
             if (wal1 == null )
             {
@@ -111,7 +111,7 @@ namespace PsiogPaisaAPI.Controllers
 
             var wal4 = (from gp in _dbcontext.Groups
                         join rq in _dbcontext.Requests on gp.ReqId equals rq.ReqId
-                        join sw in _dbcontext.SelfWallet on rq.EmpId equals sw.EmpId
+                        join sw in _dbcontext.SelfWallets on rq.EmpId equals sw.EmpId
                         select new
                         {
                             emid = rq.EmpId,
@@ -135,9 +135,9 @@ namespace PsiogPaisaAPI.Controllers
             }
 
             _dbcontext.Requests.Update(req);
-            _dbcontext.SelfWallet.Update(wal1);
+            _dbcontext.SelfWallets.Update(wal1);
 
-            var swl = _dbcontext.SelfWallet.Find(wal4[1].emid);
+            var swl = _dbcontext.SelfWallets.Find(wal4[1].emid);
             _dbcontext.Entry(swl).State = EntityState.Unchanged;
             swl.WalletAmount = tfamount;
 

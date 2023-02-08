@@ -40,7 +40,7 @@ namespace PsiogPaisaAPI.Controllers
                 await _dbcontext.SaveChangesAsync();
 
 
-                var wal = _dbcontext.SelfWallet.FirstOrDefault(e => e.EmpId == individual.SenderId);
+                var wal = _dbcontext.SelfWallets.FirstOrDefault(e => e.EmpId == individual.SenderId);
 
                 if (wal == null)
                 {
@@ -53,18 +53,18 @@ namespace PsiogPaisaAPI.Controllers
             {
                 return NotFound();
             }
-            _dbcontext.SelfWallet.Update(wal);
+            _dbcontext.SelfWallets.Update(wal);
                 
 
                 
-                var wal2 = _dbcontext.SelfWallet.FirstOrDefault(e => e.EmpId == individual.RecieverId);
+                var wal2 = _dbcontext.SelfWallets.FirstOrDefault(e => e.EmpId == individual.RecieverId);
                 wal2.WalletAmount = wal2.WalletAmount + individual.Amount;
 
                 if (wal2 == null)
                 {
                     return NotFound();
                 }
-                _dbcontext.SelfWallet.Update(wal2);
+                _dbcontext.SelfWallets.Update(wal2);
                 _dbcontext.SaveChanges();
 
             
@@ -76,7 +76,7 @@ namespace PsiogPaisaAPI.Controllers
 
         public async Task<IActionResult> GetWallet(int WalId)
         {
-            var wallet = await _dbcontext.SelfWallet.FirstOrDefaultAsync(x => x.WalId == WalId);
+            var wallet = await _dbcontext.SelfWallets.FirstOrDefaultAsync(x => x.WalId == WalId);
 
             if (wallet == null)
             {
@@ -103,8 +103,36 @@ namespace PsiogPaisaAPI.Controllers
 
             return Ok(chart);
         }
-       
-      
+
+        [HttpPost("{Id}")]
+        public async Task<IActionResult> MatchPin(int Id, [FromBody] Employee employee)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var ex = await _dbcontext.Employees.FindAsync(Id);
+
+                if (ex.Pin == employee.Pin)
+                {
+                    //await _dbcontext.SaveChangesAsync();
+                    return Ok(ex);
+                };
+                return BadRequest(ex);
+
+                //_dbcontext.Entry(employee).State = EntityState.Modified;
+                //await _dbcontext.Employees.AddAsync(employee);
+            }
+            catch (Exception exp)
+            {
+                return BadRequest(exp);
+            }
+
+        }
+
 
     }
 }

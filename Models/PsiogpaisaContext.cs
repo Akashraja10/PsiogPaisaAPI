@@ -39,7 +39,7 @@ public partial class PsiogpaisaContext : DbContext
 
     public virtual DbSet<Request> Requests { get; set; }
 
-    public virtual DbSet<SelfWallet> SelfWallet { get; set; }
+    public virtual DbSet<SelfWallet> SelfWallets { get; set; }
 
     public virtual DbSet<Statement> Statements { get; set; }
 
@@ -84,6 +84,7 @@ public partial class PsiogpaisaContext : DbContext
                 .HasMaxLength(25)
                 .IsUnicode(false)
                 .HasColumnName("password");
+            entity.Property(e => e.Pin).HasColumnName("pin");
             entity.Property(e => e.Username)
                 .IsRequired()
                 .HasMaxLength(25)
@@ -223,7 +224,7 @@ public partial class PsiogpaisaContext : DbContext
         {
             entity.HasKey(e => e.LendId).HasName("LendBack_pk");
 
-            entity.ToTable("LendBack");
+            entity.ToTable("LendBack", tb => tb.HasTrigger("TriggerLendbackInsert"));
 
             entity.Property(e => e.LendId).HasColumnName("lend_id");
             entity.Property(e => e.GroupId).HasColumnName("group_id");
