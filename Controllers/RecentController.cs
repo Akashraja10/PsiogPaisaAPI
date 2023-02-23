@@ -29,8 +29,6 @@ namespace PsiogPaisaAPI.Controllers
                              ind.RecieverId,
                              ind.Amount,
                              ind.Time,
-
-
                          }).ToList();
 
             return Ok(hello);

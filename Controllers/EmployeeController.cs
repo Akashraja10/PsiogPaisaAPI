@@ -238,14 +238,14 @@ namespace PsiogPaisaAPI.Controllers
                 };
 
 
-                var login = _dbcontext.Employees.FirstOrDefault(e => e.Username == forgotPassword.Username && e.Email == forgotPassword.Email);
-                login.Password = forgotPassword.ConfirmPassword;
+                var login = _dbcontext.Employees.FirstOrDefault(e => e.Username == forgotPassword.Username && e.Email == forgotPassword.Email);              
 
                 if (login == null)
                 {
                     return NotFound(new { Message = "Employee Not Found !" });
 
                 }
+                login.Password = forgotPassword.ConfirmPassword;
 
                 await _dbcontext.SaveChangesAsync();
                 _dbcontext.Employees.Update(login);
